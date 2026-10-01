@@ -1,52 +1,82 @@
-#target photoshop
+﻿#target photoshop
 
 /* ============================================================
-   ПЕЧАТЬ ПО ФОРМАТУ — версия 4 (финальная)
+   ПЕЧАТЬ ПО ФОРМАТУ — версия 5 (несколько точек)
    Photoshop 2025 / EPSON L18050
 
-   Отличие от прошлых версий: скрипт НЕ проигрывает экшены
-   (это в Photoshop 2025 заблокировано) и НЕ переключает
-   принтер Windows. Он вызывает команду печати напрямую —
-   код снят ScriptListener'ом с реальной печати.
+   Что делает: смотрит на открытый документ, по размеру (и для
+   10x15 — по имени файла/папке) понимает, какой это шаблон,
+   выставляет нужные настройки печати и печатает. Без диалогов.
 
-   Внутри блока печати зашито всё:
-     - принтер            EPSON L18050 Series
-     - профиль            L8050_EyePH_Chern.icm
-     - интент             Perceptual + BPC
-     - позиция/масштаб    по центру, 100%
-     - настройки драйвера размер бумаги, без полей,
-                          тип бумаги, качество
+   Почему на других точках печаталось не то:
+   в настройках, снятых ScriptListener'ом, бумага хранится не
+   по названию, а по внутреннему номеру в драйвере Epson
+   (A6 «без полосы» = №10002, A5 = №10001, 10x15 = №285).
+   Свои размеры бумаги на каждой точке создавались отдельно,
+   и номера там другие — поэтому драйвер брал не ту бумагу.
 
-   Куда положить:
-     C:\\Program Files\\Adobe\\Adobe Photoshop 2025\\Presets\\Scripts\\
-   Вызов: File -> Scripts -> Print_ByFormat_v4
+   Решение: на каждом компе один раз запускается
+   Print_ByFormat_Setup («Настройка») — для каждого формата
+   выбирается бумага с местным названием, и скрипт запоминает
+   эти настройки на этом компе (%APPDATA%\PrintByFormat).
+   Дальше Print_ByFormat печатает ими в один клик.
+   Если формат на этом компе не настроен — используются
+   встроенные настройки ниже (снятые на первой точке).
+
+   Установка: install.bat (см. ИНСТРУКЦИЯ.txt).
+   Вызов: File -> Scripts -> Print_ByFormat
    ============================================================ */
 
 
 /* ---------- НАСТРОЙКИ ---------- */
 
 var CONFIRM_BEFORE_PRINT = false;   // спрашивать перед печатью
-var TOLERANCE_CM = 0.3;            // допуск сравнения размеров, см
+var DEBUG = false;                  // true — показать, что распознано, и НЕ печатать
+var TOLERANCE_CM = 0.3;             // допуск сравнения размеров, см
+
+// Для встроенных настроек (если формат не настроен на этом компе).
+// Имя принтера — ровно как в «Принтеры и сканеры» Windows.
+var PRINTER_NAME = "EPSON L18050 Series";
+// ICC-профиль — должен лежать в C:\Windows\System32\spool\drivers\color
+var PROFILE_NAME = "L8050_EyePH_Chern.icm";
+
+// Где хранятся настройки этого компа (их пишет Настройка)
+var SETTINGS_DIR = Folder.userData + "/PrintByFormat";
 
 
 /* ---------- ТАБЛИЦА ФОРМАТОВ ---------- */
-/* w и h — размеры документа в сантиметрах.
-   Порядок не важен: сравнение идёт по короткой и длинной стороне. */
+/* id      — имя файла настроек этого формата.
+   w и h   — размеры документа в сантиметрах. Порядок не важен:
+             сравнение идёт по короткой и длинной стороне.
+   desc    — встроенные настройки печати (блоки ниже).
+   customPaper — бумага в драйвере своя (не стандартная), её номер
+             на другом компе может не совпасть. Если такой формат
+             не настроен на этом компе — спросим перед печатью.
+   keywords — слова в имени файла (маленькими буквами).
+   folders  — слово в названии любой папки на пути к файлу.
+   Русские слова записаны кодами, чтобы не зависеть от кодировки:
+     стикер  магнит  поларойд  полароид  поляроид  паларойд  телефон
+     шаблон (папка «Шаблоны», «шаблоны 10х15» и т.п.) */
 
 var FORMATS = [
 
-  { name: "A6 10x15 (без полосы)",
-    w: 15.0, h: 10.0, fn: printA6 },
+  { id: "A6", name: "A6 10x15 (без полосы)",
+    w: 15.0, h: 10.0, desc: descA6, customPaper: true },
 
-  { name: "Шаблон 10x15 (стикер/магнит/полароид)",
-    w: 15.0, h: 10.0, fn: printTemplate,
-    keywords: ["стикер", "магнит", "поларойд", "полароид",
-               "поляроид", "паларойд", "телефон"],
-    folders:  ["\\шаблоны"] },
+  { id: "10x15", name: "Шаблон 10x15 (стикер/магнит/полароид)",
+    w: 15.0, h: 10.0, desc: descTemplate, customPaper: true,
+    keywords: ["\u0441\u0442\u0438\u043a\u0435\u0440",                  // стикер
+               "\u043c\u0430\u0433\u043d\u0438\u0442",                  // магнит
+               "\u043f\u043e\u043b\u0430\u0440\u043e\u0439\u0434",          // поларойд
+               "\u043f\u043e\u043b\u0430\u0440\u043e\u0438\u0434",          // полароид
+               "\u043f\u043e\u043b\u044f\u0440\u043e\u0438\u0434",          // поляроид
+               "\u043f\u0430\u043b\u0430\u0440\u043e\u0439\u0434",          // паларойд
+               "\u0442\u0435\u043b\u0435\u0444\u043e\u043d"],           // телефон
+    folders:  ["\u0448\u0430\u0431\u043b\u043e\u043d"] },                 // шаблон
 
-  { name: "A5", w: 21.0, h: 14.8, fn: printA5 },
-  { name: "A4", w: 29.7, h: 21.0, fn: printA4 },
-  { name: "A3", w: 42.0, h: 29.7, fn: printA3 }
+  { id: "A5", name: "A5", w: 21.0, h: 14.8, desc: descA5, customPaper: true },
+  { id: "A4", name: "A4", w: 29.7, h: 21.0, desc: descA4 },
+  { id: "A3", name: "A3", w: 42.0, h: 29.7, desc: descA3 }
 
 ];
 
@@ -57,7 +87,7 @@ var FORMATS = [
    при смене настроек проще перезаписать лог заново.
    ============================================================ */
 
-function printA6() {
+function descA6() {
 
     var idPrnt = charIDToTypeID( "Prnt" );
         var desc673 = new ActionDescriptor();
@@ -78,7 +108,7 @@ function printA6() {
             var idRGBC = charIDToTypeID( "RGBC" );
             desc674.putEnumerated( idClrS, idClrS, idRGBC );
             var idNm = charIDToTypeID( "Nm  " );
-            desc674.putString( idNm, "L8050_EyePH_Chern.icm" );
+            desc674.putString( idNm, PROFILE_NAME );
             var idInte = charIDToTypeID( "Inte" );
             var idInte = charIDToTypeID( "Inte" );
             var idImg = charIDToTypeID( "Img " );
@@ -88,7 +118,7 @@ function printA6() {
             var idprintSixteenBit = stringIDToTypeID( "printSixteenBit" );
             desc674.putBoolean( idprintSixteenBit, false );
             var idprinterName = stringIDToTypeID( "printerName" );
-            desc674.putString( idprinterName, "EPSON L18050 Series" );
+            desc674.putString( idprinterName, PRINTER_NAME );
             var idprintProofSetup = stringIDToTypeID( "printProofSetup" );
                 var desc675 = new ActionDescriptor();
                 var idBltn = charIDToTypeID( "Bltn" );
@@ -438,10 +468,7 @@ function printA6() {
         desc673.putObject( idosSpecificPrintInfo, idosSpecificPrintInfo, desc679 );
         var idCptn = charIDToTypeID( "Cptn" );
         desc673.putString( idCptn, "" );
-    executeAction( idPrnt, desc673, DialogModes.NO );
-
-    var idprintOneCopy = stringIDToTypeID( "printOneCopy" );
-    executeAction( idprintOneCopy, undefined, DialogModes.NO );
+    return desc673;
 }
 
 
@@ -449,7 +476,7 @@ function printA6() {
    БЛОК ПЕЧАТИ A5
    ============================================================ */
 
-function printA5() {
+function descA5() {
 
     var idPrnt = charIDToTypeID( "Prnt" );
         var desc271 = new ActionDescriptor();
@@ -470,7 +497,7 @@ function printA5() {
             var idRGBC = charIDToTypeID( "RGBC" );
             desc272.putEnumerated( idClrS, idClrS, idRGBC );
             var idNm = charIDToTypeID( "Nm  " );
-            desc272.putString( idNm, "L8050_EyePH_Chern.icm" );
+            desc272.putString( idNm, PROFILE_NAME );
             var idInte = charIDToTypeID( "Inte" );
             var idInte = charIDToTypeID( "Inte" );
             var idImg = charIDToTypeID( "Img " );
@@ -480,7 +507,7 @@ function printA5() {
             var idprintSixteenBit = stringIDToTypeID( "printSixteenBit" );
             desc272.putBoolean( idprintSixteenBit, false );
             var idprinterName = stringIDToTypeID( "printerName" );
-            desc272.putString( idprinterName, "EPSON L18050 Series" );
+            desc272.putString( idprinterName, PRINTER_NAME );
             var idprintProofSetup = stringIDToTypeID( "printProofSetup" );
                 var desc273 = new ActionDescriptor();
                 var idBltn = charIDToTypeID( "Bltn" );
@@ -830,10 +857,7 @@ function printA5() {
         desc271.putObject( idosSpecificPrintInfo, idosSpecificPrintInfo, desc277 );
         var idCptn = charIDToTypeID( "Cptn" );
         desc271.putString( idCptn, "" );
-    executeAction( idPrnt, desc271, DialogModes.NO );
-
-    var idprintOneCopy = stringIDToTypeID( "printOneCopy" );
-    executeAction( idprintOneCopy, undefined, DialogModes.NO );
+    return desc271;
 }
 
 
@@ -841,7 +865,7 @@ function printA5() {
    БЛОК ПЕЧАТИ A4
    ============================================================ */
 
-function printA4() {
+function descA4() {
 
     var idPrnt = charIDToTypeID( "Prnt" );
         var desc294 = new ActionDescriptor();
@@ -862,7 +886,7 @@ function printA4() {
             var idRGBC = charIDToTypeID( "RGBC" );
             desc295.putEnumerated( idClrS, idClrS, idRGBC );
             var idNm = charIDToTypeID( "Nm  " );
-            desc295.putString( idNm, "L8050_EyePH_Chern.icm" );
+            desc295.putString( idNm, PROFILE_NAME );
             var idInte = charIDToTypeID( "Inte" );
             var idInte = charIDToTypeID( "Inte" );
             var idImg = charIDToTypeID( "Img " );
@@ -872,7 +896,7 @@ function printA4() {
             var idprintSixteenBit = stringIDToTypeID( "printSixteenBit" );
             desc295.putBoolean( idprintSixteenBit, false );
             var idprinterName = stringIDToTypeID( "printerName" );
-            desc295.putString( idprinterName, "EPSON L18050 Series" );
+            desc295.putString( idprinterName, PRINTER_NAME );
             var idprintProofSetup = stringIDToTypeID( "printProofSetup" );
                 var desc296 = new ActionDescriptor();
                 var idBltn = charIDToTypeID( "Bltn" );
@@ -1222,10 +1246,7 @@ function printA4() {
         desc294.putObject( idosSpecificPrintInfo, idosSpecificPrintInfo, desc300 );
         var idCptn = charIDToTypeID( "Cptn" );
         desc294.putString( idCptn, "" );
-    executeAction( idPrnt, desc294, DialogModes.NO );
-
-    var idprintOneCopy = stringIDToTypeID( "printOneCopy" );
-    executeAction( idprintOneCopy, undefined, DialogModes.NO );
+    return desc294;
 }
 
 
@@ -1233,7 +1254,7 @@ function printA4() {
    БЛОК ПЕЧАТИ A3
    ============================================================ */
 
-function printA3() {
+function descA3() {
 
     var idPrnt = charIDToTypeID( "Prnt" );
         var desc318 = new ActionDescriptor();
@@ -1254,7 +1275,7 @@ function printA3() {
             var idRGBC = charIDToTypeID( "RGBC" );
             desc319.putEnumerated( idClrS, idClrS, idRGBC );
             var idNm = charIDToTypeID( "Nm  " );
-            desc319.putString( idNm, "L8050_EyePH_Chern.icm" );
+            desc319.putString( idNm, PROFILE_NAME );
             var idInte = charIDToTypeID( "Inte" );
             var idInte = charIDToTypeID( "Inte" );
             var idImg = charIDToTypeID( "Img " );
@@ -1264,7 +1285,7 @@ function printA3() {
             var idprintSixteenBit = stringIDToTypeID( "printSixteenBit" );
             desc319.putBoolean( idprintSixteenBit, false );
             var idprinterName = stringIDToTypeID( "printerName" );
-            desc319.putString( idprinterName, "EPSON L18050 Series" );
+            desc319.putString( idprinterName, PRINTER_NAME );
             var idprintProofSetup = stringIDToTypeID( "printProofSetup" );
                 var desc320 = new ActionDescriptor();
                 var idBltn = charIDToTypeID( "Bltn" );
@@ -1614,10 +1635,7 @@ function printA3() {
         desc318.putObject( idosSpecificPrintInfo, idosSpecificPrintInfo, desc324 );
         var idCptn = charIDToTypeID( "Cptn" );
         desc318.putString( idCptn, "" );
-    executeAction( idPrnt, desc318, DialogModes.NO );
-
-    var idprintOneCopy = stringIDToTypeID( "printOneCopy" );
-    executeAction( idprintOneCopy, undefined, DialogModes.NO );
+    return desc318;
 }
 
 
@@ -1626,7 +1644,7 @@ function printA3() {
    Размер бумаги в драйвере: 10 x 15 cm (4 x 6 in)
    ============================================================ */
 
-function printTemplate() {
+function descTemplate() {
 
     var idPrnt = charIDToTypeID( "Prnt" );
         var desc349 = new ActionDescriptor();
@@ -1647,7 +1665,7 @@ function printTemplate() {
             var idRGBC = charIDToTypeID( "RGBC" );
             desc350.putEnumerated( idClrS, idClrS, idRGBC );
             var idNm = charIDToTypeID( "Nm  " );
-            desc350.putString( idNm, "L8050_EyePH_Chern.icm" );
+            desc350.putString( idNm, PROFILE_NAME );
             var idInte = charIDToTypeID( "Inte" );
             var idInte = charIDToTypeID( "Inte" );
             var idImg = charIDToTypeID( "Img " );
@@ -1657,7 +1675,7 @@ function printTemplate() {
             var idprintSixteenBit = stringIDToTypeID( "printSixteenBit" );
             desc350.putBoolean( idprintSixteenBit, false );
             var idprinterName = stringIDToTypeID( "printerName" );
-            desc350.putString( idprinterName, "EPSON L18050 Series" );
+            desc350.putString( idprinterName, PRINTER_NAME );
             var idprintProofSetup = stringIDToTypeID( "printProofSetup" );
                 var desc351 = new ActionDescriptor();
                 var idBltn = charIDToTypeID( "Bltn" );
@@ -2007,10 +2025,7 @@ function printTemplate() {
         desc349.putObject( idosSpecificPrintInfo, idosSpecificPrintInfo, desc355 );
         var idCptn = charIDToTypeID( "Cptn" );
         desc349.putString( idCptn, "" );
-    executeAction( idPrnt, desc349, DialogModes.NO );
-
-    var idprintOneCopy = stringIDToTypeID( "printOneCopy" );
-    executeAction( idprintOneCopy, undefined, DialogModes.NO );
+    return desc349;
 }
 
 
@@ -2019,11 +2034,15 @@ function printTemplate() {
    ============================================================ */
 
 /* Имя файла и путь в нижнем регистре.
+   Путь берём через fsName (обычный путь Windows, без %-кодов)
+   и приводим разделители к «/».
    Если документ не сохранён — вернутся пустые строки. */
 function getDocInfo(doc) {
     var info = { name: "", path: "" };
     try { info.name = String(doc.name).toLowerCase(); } catch (e) {}
-    try { info.path = String(doc.path).toLowerCase(); } catch (e) {}
+    try {
+        info.path = String(doc.path.fsName).replace(/\\/g, "/").toLowerCase();
+    } catch (e) {}
     return info;
 }
 
@@ -2051,18 +2070,21 @@ function candidatesBySize(doc) {
 
 /* Насколько формат подходит по имени файла и папке.
    2 — совпало ключевое слово в имени
-   1 — совпала папка
+   1 — слово из folders есть в названии одной из папок пути
    0 — признаков нет */
 function score(f, info) {
-    var i;
+    var i, j;
     if (f.keywords) {
         for (i = 0; i < f.keywords.length; i++) {
             if (info.name.indexOf(f.keywords[i]) !== -1) return 2;
         }
     }
     if (f.folders) {
+        var parts = info.path.split("/");
         for (i = 0; i < f.folders.length; i++) {
-            if (info.path.indexOf(f.folders[i]) !== -1) return 1;
+            for (j = 0; j < parts.length; j++) {
+                if (parts[j].indexOf(f.folders[i]) !== -1) return 1;
+            }
         }
     }
     return 0;
@@ -2098,6 +2120,65 @@ function pickFormat(doc) {
 }
 
 
+function sizeText(doc) {
+    return doc.width.as("cm").toFixed(1) + " x " +
+           doc.height.as("cm").toFixed(1) + " \u0441\u043c";   // см
+}
+
+
+/* ---------- Настройки этого компа ---------- */
+
+function settingsFile(f) {
+    return new File(SETTINGS_DIR + "/" + f.id + ".desc");
+}
+
+/* Сохранённые настройки формата или null */
+function loadSaved(f) {
+    var file = settingsFile(f);
+    if (!file.exists) return null;
+    try {
+        file.encoding = "BINARY";
+        if (!file.open("r")) return null;
+        var data = file.read();
+        file.close();
+        var d = new ActionDescriptor();
+        d.fromStream(data);
+        return d;
+    } catch (e) {
+        try { file.close(); } catch (e2) {}
+        return null;
+    }
+}
+
+function saveSettings(f, d) {
+    var dir = new Folder(SETTINGS_DIR);
+    if (!dir.exists) dir.create();
+    var file = settingsFile(f);
+    file.encoding = "BINARY";
+    if (!file.open("w")) throw new Error("Не удалось записать " + file.fsName);
+    file.write(d.toStream());
+    file.close();
+}
+
+/* Команда печати должна ссылаться на текущий документ */
+function ensureTarget(d) {
+    var idnull = charIDToTypeID("null");
+    if (d.hasKey(idnull)) return d;
+    var ref = new ActionReference();
+    ref.putProperty(charIDToTypeID("Prpr"), stringIDToTypeID("printOutput"));
+    ref.putEnumerated(charIDToTypeID("Dcmn"), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+    d.putReference(idnull, ref);
+    return d;
+}
+
+function doPrint(d) {
+    executeAction(charIDToTypeID("Prnt"), ensureTarget(d), DialogModes.NO);
+    executeAction(stringIDToTypeID("printOneCopy"), undefined, DialogModes.NO);
+}
+
+
+/* ---------- Печать (основная кнопка) ---------- */
+
 function main() {
 
     if (app.documents.length === 0) {
@@ -2107,19 +2188,115 @@ function main() {
 
     var doc = app.activeDocument;
     var fmt = pickFormat(doc);
+    var saved = fmt ? loadSaved(fmt) : null;
 
-    if (fmt === null) return;   // не распознано или отменено
+    if (DEBUG) {
+        var info = getDocInfo(doc);
+        alert("DEBUG\n\n" +
+              "Размер: " + sizeText(doc) + "\n" +
+              "Имя: " + info.name + "\n" +
+              "Папка: " + info.path + "\n\n" +
+              "Выбран формат: " + (fmt ? fmt.name : "— не распознан —") + "\n" +
+              "Настройки: " + (saved ? "этого компа" : "встроенные") +
+              "\n\n(печать в режиме DEBUG не запускается)");
+        return;
+    }
 
-    if (CONFIRM_BEFORE_PRINT) {
+    if (fmt === null) {
+        alert("Формат не распознан.\n\nРазмер документа: " + sizeText(doc) +
+              "\n\nОжидается 10x15, A5, A4 или A3 (допуск " + TOLERANCE_CM + " см).");
+        return;
+    }
+
+    if (saved === null && fmt.customPaper) {
+        if (!confirm("Формат «" + fmt.name + "» на этом компе ещё не настроен.\n\n" +
+                     "Запустите File -> Scripts -> Print_ByFormat_Setup,\n" +
+                     "иначе бумага может выбраться не та.\n\n" +
+                     "Всё равно печатать встроенными настройками?")) return;
+    } else if (CONFIRM_BEFORE_PRINT) {
         if (!confirm("Формат: " + fmt.name + "\n\nПечатать?")) return;
     }
 
     try {
-        fmt.fn();
+        doPrint(saved !== null ? saved : fmt.desc());
     } catch (e) {
-        alert("Ошибка при печати.\n\nФормат: " + fmt.name + "\n\n" + e);
+        alert("Ошибка при печати.\n\nФормат: " + fmt.name +
+              "\nНастройки: " + (saved ? "этого компа" : "встроенные") + "\n\n" + e);
     }
 }
 
 
-main();
+/* ---------- Настройка (кнопка Print_ByFormat_Setup) ---------- */
+
+function setupStatus() {
+    var lines = [];
+    for (var i = 0; i < FORMATS.length; i++) {
+        var f = FORMATS[i];
+        lines.push((settingsFile(f).exists ? "[+] " : "[  ] ") + f.name);
+    }
+    return lines.join("\n");
+}
+
+function setup() {
+
+    if (app.documents.length === 0) {
+        alert("НАСТРОЙКА ПЕЧАТИ\n\n" +
+              "Откройте шаблон нужного формата и запустите Настройку ещё раз.\n\n" +
+              "Настроено на этом компе:\n" + setupStatus());
+        return;
+    }
+
+    var doc = app.activeDocument;
+    var fmt = pickFormat(doc);
+
+    if (fmt === null) {
+        alert("Формат не распознан.\n\nРазмер документа: " + sizeText(doc) +
+              "\n\nОткройте шаблон 10x15, A5, A4 или A3.");
+        return;
+    }
+
+    var saved = loadSaved(fmt);
+
+    if (!confirm("НАСТРОЙКА: " + fmt.name +
+                 (saved ? "  (уже настроен — перенастроить)" : "") + "\n\n" +
+                 "Сейчас откроется окно печати.\n" +
+                 "1. Принтер — EPSON, профиль — как обычно.\n" +
+                 "2. «Параметры печати» -> выберите бумагу для этого\n" +
+                 "   формата (как она называется на этой точке),\n" +
+                 "   без полей, тип бумаги, качество -> OK.\n" +
+                 "3. Нажмите «Готово».\n\n" +
+                 "Продолжить?")) return;
+
+    var result;
+    try {
+        result = executeAction(charIDToTypeID("Prnt"),
+                               ensureTarget(saved !== null ? saved : fmt.desc()),
+                               DialogModes.ALL);
+    } catch (e) {
+        alert("Настройка не сохранена (окно закрыто без «Готово»).\n\n" +
+              "Если «Готово» не срабатывает — попробуйте ещё раз\n" +
+              "и нажмите «Печать» (будет одна пробная печать).\n\n" + e);
+        return;
+    }
+
+    if (!result || !result.hasKey(stringIDToTypeID("osSpecificPrintInfo"))) {
+        alert("Photoshop не вернул настройки драйвера — сохранить нечего.\n" +
+              "Пришлите это сообщение тому, кто настраивал скрипт.");
+        return;
+    }
+
+    try {
+        saveSettings(fmt, ensureTarget(result));
+    } catch (e) {
+        alert("Ошибка сохранения настроек.\n\n" + e);
+        return;
+    }
+
+    alert("Готово: «" + fmt.name + "» настроен на этом компе.\n\n" +
+          "Настроено:\n" + setupStatus());
+}
+
+
+/* Print_ByFormat_Setup.jsx ставит PBF_SETUP_MODE = true и запускает этот файл */
+if (typeof PBF_SETUP_MODE !== "undefined" && PBF_SETUP_MODE) setup();
+else main();
