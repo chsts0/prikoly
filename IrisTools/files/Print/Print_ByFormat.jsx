@@ -34,6 +34,11 @@ var CONFIRM_BEFORE_PRINT = false;   // спрашивать перед печа�
 var DEBUG = false;                  // true — показать, что распознано, и НЕ печатать
 var TOLERANCE_CM = 0.3;             // допуск сравнения размеров, см
 
+// Обычные разрешения шаблонов. Если у документа разрешение сбито
+// (например, A5 2480x1748 пикс. стоит как 500 ppi и «весит» 12.6x8.9 см),
+// формат узнаётся по пикселям, а при печати разрешение исправляется.
+var PPI_GUESSES = [300, 500];
+
 // Для встроенных настроек (если формат не настроен на этом компе).
 // Имя принтера — ровно как в «Принтеры и сканеры» Windows.
 var PRINTER_NAME = "EPSON L18050 Series";
@@ -2047,10 +2052,25 @@ function getDocInfo(doc) {
 }
 
 
-/* Все форматы, подходящие по размеру */
-function candidatesBySize(doc) {
+/* Размер документа в см. ppi не задан — по разрешению самого документа,
+   задан — как если бы у документа было такое разрешение. */
+function docSizeCm(doc, ppi) {
     var w = doc.width.as("cm");
     var h = doc.height.as("cm");
+    if (ppi) {
+        var k = doc.resolution / ppi;
+        w *= k;
+        h *= k;
+    }
+    return { w: w, h: h };
+}
+
+
+/* Все форматы, подходящие по размеру */
+function candidatesBySize(doc, ppi) {
+    var size = docSizeCm(doc, ppi);
+    var w = size.w;
+    var h = size.h;
     var docShort = Math.min(w, h);
     var docLong  = Math.max(w, h);
     var out = [];
@@ -2091,8 +2111,8 @@ function score(f, info) {
 }
 
 
-function pickFormat(doc) {
-    var list = candidatesBySize(doc);
+function pickFormat(doc, ppi) {
+    var list = candidatesBySize(doc, ppi);
 
     if (list.length === 0) return null;
     if (list.length === 1) return list[0];
@@ -2120,9 +2140,27 @@ function pickFormat(doc) {
 }
 
 
+/* Формат документа и разрешение, с которым его печатать.
+   null — не распознан. */
+function detect(doc) {
+    var fmt = pickFormat(doc, null);
+    if (fmt) return { fmt: fmt, ppi: doc.resolution };
+
+    for (var i = 0; i < PPI_GUESSES.length; i++) {
+        if (Math.abs(PPI_GUESSES[i] - doc.resolution) < 1) continue;
+        fmt = pickFormat(doc, PPI_GUESSES[i]);
+        if (fmt) return { fmt: fmt, ppi: PPI_GUESSES[i] };
+    }
+    return null;
+}
+
+
 function sizeText(doc) {
+    var px = function (v) { return Math.round(v.as("cm") / 2.54 * doc.resolution); };
     return doc.width.as("cm").toFixed(1) + " x " +
-           doc.height.as("cm").toFixed(1) + " \u0441\u043c";   // см
+           doc.height.as("cm").toFixed(1) + " \u0441\u043c  (" +            // см
+           px(doc.width) + " x " + px(doc.height) + " px, " +
+           Math.round(doc.resolution) + " ppi)";
 }
 
 
@@ -2171,8 +2209,37 @@ function ensureTarget(d) {
     return d;
 }
 
-function doPrint(d) {
-    executeAction(charIDToTypeID("Prnt"), ensureTarget(d), DialogModes.NO);
+/* Печать в настоящем размере: масштаб 100% и разрешение — как у документа.
+   В записанных настройках разрешение зашито (500 ppi — как у шаблонов на
+   первой точке). Если у документа другое, Photoshop при печати подменял
+   разрешение документа, и A5 300 ppi печатался 12.6x8.9 см. */
+function fitToDocument(d, ppi) {
+    var key = stringIDToTypeID("printOutputOptions");
+    if (!d.hasKey(key)) return d;
+    var cls = d.getObjectType(key);
+    var opt = d.getObjectValue(key);
+    opt.putUnitDouble(charIDToTypeID("Rslt"), charIDToTypeID("#Pxl"), ppi);
+    opt.putUnitDouble(charIDToTypeID("Scl "), charIDToTypeID("#Prc"), 100);
+    d.putObject(key, cls, opt);
+    return d;
+}
+
+/* Принтер, на который настроен этот комп (по любому настроенному формату),
+   или null, если ничего не настроено */
+function localPrinter() {
+    for (var i = 0; i < FORMATS.length; i++) {
+        var d = loadSaved(FORMATS[i]);
+        if (!d) continue;
+        try {
+            return d.getObjectValue(stringIDToTypeID("printOutput"))
+                    .getString(stringIDToTypeID("printerName"));
+        } catch (e) {}
+    }
+    return null;
+}
+
+function doPrint(d, ppi) {
+    executeAction(charIDToTypeID("Prnt"), fitToDocument(ensureTarget(d), ppi), DialogModes.NO);
     executeAction(stringIDToTypeID("printOneCopy"), undefined, DialogModes.NO);
 }
 
@@ -2187,7 +2254,8 @@ function main() {
     }
 
     var doc = app.activeDocument;
-    var fmt = pickFormat(doc);
+    var found = detect(doc);
+    var fmt = found ? found.fmt : null;
     var saved = fmt ? loadSaved(fmt) : null;
 
     if (DEBUG) {
@@ -2197,6 +2265,7 @@ function main() {
               "Имя: " + info.name + "\n" +
               "Папка: " + info.path + "\n\n" +
               "Выбран формат: " + (fmt ? fmt.name : "— не распознан —") + "\n" +
+              (found ? "Печать с разрешением: " + Math.round(found.ppi) + " ppi\n" : "") +
               "Настройки: " + (saved ? "этого компа" : "встроенные") +
               "\n\n(печать в режиме DEBUG не запускается)");
         return;
@@ -2208,7 +2277,12 @@ function main() {
         return;
     }
 
-    if (saved === null && fmt.customPaper) {
+    // встроенные настройки сняты с EPSON L18050: на другом принтере
+    // (например L8050) им верить нельзя — как и своей бумаге (customPaper)
+    var other = saved === null ? localPrinter() : null;
+    var foreign = other !== null && other !== PRINTER_NAME;
+
+    if (saved === null && (fmt.customPaper || foreign)) {
         if (!confirm("Формат «" + fmt.name + "» на этом компе ещё не настроен.\n\n" +
                      "Запустите File -> Scripts -> Print_ByFormat_Setup,\n" +
                      "иначе бумага может выбраться не та.\n\n" +
@@ -2218,7 +2292,7 @@ function main() {
     }
 
     try {
-        doPrint(saved !== null ? saved : fmt.desc());
+        doPrint(saved !== null ? saved : fmt.desc(), found.ppi);
     } catch (e) {
         alert("Ошибка при печати.\n\nФормат: " + fmt.name +
               "\nНастройки: " + (saved ? "этого компа" : "встроенные") + "\n\n" + e);
@@ -2247,7 +2321,8 @@ function setup() {
     }
 
     var doc = app.activeDocument;
-    var fmt = pickFormat(doc);
+    var found = detect(doc);
+    var fmt = found ? found.fmt : null;
 
     if (fmt === null) {
         alert("Формат не распознан.\n\nРазмер документа: " + sizeText(doc) +
@@ -2270,7 +2345,7 @@ function setup() {
     var result;
     try {
         result = executeAction(charIDToTypeID("Prnt"),
-                               ensureTarget(saved !== null ? saved : fmt.desc()),
+                               fitToDocument(ensureTarget(saved !== null ? saved : fmt.desc()), found.ppi),
                                DialogModes.ALL);
     } catch (e) {
         alert("Настройка не сохранена (окно закрыто без «Готово»).\n\n" +
