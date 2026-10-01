@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<style>
+  body {
+    margin: 0;
+    padding: 10px;
+    background: #323232;
+    color: #e8e8e8;
+    font-family: "Adobe Clean", sans-serif;
+    font-size: 12px;
+  }
+  .section {
+    margin-bottom: 4px;
+    font-size: 11px;
+    color: #a8a8a8;
+  }
+  #fmtInfo {
+    font-size: 11px;
+    line-height: 15px;
+    color: #c8c8c8;
+  }
+  sp-slider {
+    width: 100%;
+    margin: 10px 0 8px;
+  }
+  .hidden { display: none; }
+  .btn {
+    padding: 11px 0;
+    text-align: center;
+    background: #1473e6;
+    border-radius: 4px;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .btn.disabled { opacity: 0.4; }
+
+  #tplRow { margin-top: 8px; }
+  .tpl-row {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 5px;
+  }
+  .tpl {
+    flex: 1;
+    margin-right: 5px;
+    padding: 9px 0;
+    text-align: center;
+    background: #3d3d3d;
+    border-radius: 4px;
+    color: #d8d8d8;
+    font-size: 11px;
+    line-height: 13px;
+  }
+  .tpl.last { margin-right: 0; }
+
+  #status {
+    display: none;
+    margin-top: 8px;
+    font-size: 11px;
+    line-height: 15px;
+  }
+  #status.err {
+    display: block;
+    color: #ff6b6b;
+  }
+</style>
+</head>
+<body>
+
+  <div class="section">Формат документа</div>
+  <div id="fmtInfo">Нет открытого документа</div>
+
+  <sp-slider id="pupilSlider" min="300" max="2200" value="900" step="2"></sp-slider>
+  <div class="hidden"><span id="pupilVal">900</span></div>
+
+  <div class="btn" id="applyBtn">Сузить и закрасить зрачок</div>
+
+  <div id="tplRow"></div>
+
+  <div id="status"></div>
+
+<script src="main.js"></script>
+</body>
+</html>

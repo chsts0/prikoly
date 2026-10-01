@@ -1,0 +1,93 @@
+{
+  "id": "com.iristools.panel",
+  "name": "Iris Tools",
+  "version": "1.0.0",
+  "main": "index.html",
+  "manifestVersion": 5,
+  "icons": [
+    {
+      "width": 48,
+      "height": 48,
+      "path": "icons/plugin.png",
+      "scale": [
+        1,
+        2
+      ],
+      "theme": [
+        "darkest",
+        "dark",
+        "light",
+        "lightest"
+      ],
+      "species": [
+        "generic"
+      ]
+    }
+  ],
+  "host": {
+    "app": "PS",
+    "minVersion": "24.0.0"
+  },
+  "entrypoints": [
+    {
+      "type": "panel",
+      "id": "iristools.panel",
+      "label": {
+        "default": "Iris Tools"
+      },
+      "icons": [
+        {
+          "width": 23,
+          "height": 23,
+          "path": "icons/panel-dark.png",
+          "scale": [
+            1,
+            2
+          ],
+          "theme": [
+            "darkest",
+            "dark"
+          ],
+          "species": [
+            "generic"
+          ]
+        },
+        {
+          "width": 23,
+          "height": 23,
+          "path": "icons/panel-light.png",
+          "scale": [
+            1,
+            2
+          ],
+          "theme": [
+            "light",
+            "lightest"
+          ],
+          "species": [
+            "generic"
+          ]
+        }
+      ],
+      "minimumSize": {
+        "width": 220,
+        "height": 160
+      },
+      "maximumSize": {
+        "width": 480,
+        "height": 1200
+      },
+      "preferredDockedSize": {
+        "width": 260,
+        "height": 300
+      },
+      "preferredFloatingSize": {
+        "width": 280,
+        "height": 420
+      }
+    }
+  ],
+  "requiredPermissions": {
+    "localFileSystem": "fullAccess"
+  }
+}
