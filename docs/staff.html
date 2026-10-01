@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Iris Tools — инструкция для сотрудников</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  /* обложка-шпаргалка */
+  .hero { margin-bottom: 8mm; }
+  .hero .kicker {
+    font-family: "Manrope", sans-serif; font-weight: 700; font-size: 10pt;
+    color: var(--accent); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 3mm;
+  }
+  .hero h1 { margin-bottom: 4mm; }
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+  .card {
+    border: 1px solid var(--line); border-radius: 3.5mm; padding: 5mm;
+    display: flex; flex-direction: column; gap: 3mm; min-height: 47mm;
+  }
+  .card .keys { display: flex; align-items: center; min-height: 15mm; }
+  .card h3 { font-size: 13pt; margin: 0; }
+  .card p { margin: 0; color: var(--ink-2); font-size: 9.8pt; }
+  .card .pg { margin-top: auto; font-size: 8.5pt; color: var(--muted); }
+  .card.panel-card .keys .pill {
+    height: 15mm; padding: 0 5mm; border-radius: 3mm; background: var(--accent); color: #fff;
+    font-family: "Manrope", sans-serif; font-weight: 800; font-size: 13pt;
+    display: flex; align-items: center; white-space: nowrap;
+  }
+
+  /* дерево папок */
+  .tree { font-family: "Inter", sans-serif; font-size: 10pt; }
+  .tree .row { display: flex; align-items: center; gap: 3mm; padding: 1.1mm 0; }
+  .tree .ico { width: 8mm; height: 6mm; flex: none; }
+  .tree .name { font-weight: 600; }
+  .tree .tag {
+    margin-left: auto; font-size: 8pt; font-weight: 600; padding: .8mm 2.4mm; border-radius: 10mm;
+    white-space: nowrap;
+  }
+  .tag.once { background: var(--tint); color: var(--ink-2); border: 1px solid var(--line); }
+  .tag.auto { background: var(--ok-soft); color: var(--ok); border: 1px solid var(--ok-line); }
+  .tag.you  { background: var(--accent-soft); color: var(--accent-ink); border: 1px solid #b9d4f6; }
+  .tree .l1 { padding-left: 7mm; }
+  .tree .l2 { padding-left: 14mm; }
+  .tree .l3 { padding-left: 21mm; }
+
+  /* пары глаз */
+  .layouts { display: flex; gap: 6mm; margin-bottom: 5mm; }
+  .layout { flex: 1; border: 1px solid var(--line); border-radius: 3.5mm; padding: 4mm; }
+  .layout .lh { display: flex; align-items: center; gap: 3mm; margin-bottom: 3mm; }
+  .layout .lh h3 { margin: 0; font-size: 13pt; }
+  .layout svg { width: 100%; height: auto; display: block; }
+  .layout p { margin: 3mm 0 0; font-size: 9.5pt; color: var(--ink-2); }
+
+  /* копия панели */
+  .ps-panel {
+    width: 82mm; background: #2b2b2b; border-radius: 2mm; padding: 4.5mm 4mm 4mm;
+    font-family: "Inter", sans-serif; color: #e8e8e8; position: relative;
+    box-shadow: 0 2mm 6mm rgba(0,0,0,.18);
+  }
+  .ps-panel .lbl { font-size: 7.5pt; color: #a8a8a8; margin-bottom: 1mm; }
+  .ps-panel .fmt { font-size: 7.8pt; color: #d6d6d6; }
+  .ps-panel .slider { position: relative; height: 9mm; margin: 2mm 0 1mm; }
+  .ps-panel .slider .track { position: absolute; left: 0; right: 0; top: 4.3mm; height: .5mm; background: #8a8a8a; border-radius: 1mm; }
+  .ps-panel .slider .fill { position: absolute; left: 0; width: 37%; top: 4.3mm; height: .5mm; background: #d0d0d0; }
+  .ps-panel .slider .knob {
+    position: absolute; left: 37%; top: 2.5mm; width: 4mm; height: 4mm; margin-left: -2mm;
+    border-radius: 50%; border: .55mm solid #e0e0e0; background: #2b2b2b;
+  }
+  .ps-panel .blue {
+    background: #1473e6; color: #fff; text-align: center; font-weight: 600; font-size: 8.3pt;
+    border-radius: 1.4mm; padding: 3mm 0; margin-bottom: 2mm;
+  }
+  .ps-panel .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5mm; }
+  .ps-panel .grid div {
+    background: #3d3d3d; color: #d8d8d8; text-align: center; font-size: 7.6pt; padding: 2.4mm 0;
+    border-radius: 1.2mm;
+  }
+  .ps-panel .grid .wide { grid-column: span 2; }
+  .badge {
+    position: absolute; width: 6.4mm; height: 6.4mm; border-radius: 50%;
+    background: #ffcc00; color: #111; border: .5mm solid #111;
+    font-family: "Manrope", sans-serif; font-weight: 800; font-size: 9pt;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .legend { list-style: none; padding: 0; margin: 0; }
+  .legend li { display: flex; gap: 3mm; margin-bottom: 3.4mm; font-size: 9.8pt; }
+  .legend .n {
+    flex: none; width: 6.4mm; height: 6.4mm; border-radius: 50%; background: #ffcc00; border: .5mm solid #111;
+    font-family: "Manrope", sans-serif; font-weight: 800; font-size: 9pt;
+    display: flex; align-items: center; justify-content: center; margin-top: -.3mm;
+  }
+
+  /* форматы печати */
+  .fmt-row { display: flex; align-items: center; gap: 4mm; }
+  .sheet { flex: none; border: 1.4px solid var(--ink); border-radius: .8mm; background: #fff; }
+</style>
+</head>
+<body>
+
+<!-- ======================= 1. ШПАРГАЛКА ======================= -->
+<section class="page">
+  <div class="runhead"><span><b>Iris Tools</b> · инструкция для сотрудников</span><span>Photoshop</span></div>
+
+  <div class="hero">
+    <div class="kicker">Шпаргалка</div>
+    <h1>Что нажимать<br>в Photoshop</h1>
+    <p class="lead">Здесь только то, что вы делаете руками. Подробности по каждой кнопке — на следующих страницах.</p>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="keys"><span class="key big">F5</span></div>
+      <h3>Сохранить фото</h3>
+      <p>Вписать 4 цифры номера — и всё. Папка на сегодня создаётся сама.</p>
+      <div class="pg">стр. 2</div>
+    </div>
+    <div class="card">
+      <div class="keys"><span class="key big">F1</span><span class="plus">/</span><span class="key big">F2</span></div>
+      <h3>Пара глаз: «Углы» / «Целые»</h3>
+      <p>Выделить два слоя с глазами — скрипт сам расставит их по формату.</p>
+      <div class="pg">стр. 3</div>
+    </div>
+    <div class="card">
+      <div class="keys"><span class="key big">Ctrl</span><span class="plus">+</span><span class="key big">P</span></div>
+      <h3>Печать по формату</h3>
+      <p>Сразу печатает без окон. Формат (A6–A3, магниты, стикеры) скрипт понимает сам.</p>
+      <div class="pg">стр. 4</div>
+    </div>
+    <div class="card">
+      <div class="keys"><span class="key mid">Ctrl</span><span class="plus">+</span><span class="key mid">Shift</span><span class="plus">+</span><span class="key mid">P</span></div>
+      <h3>Обычная печать</h3>
+      <p>Привычное окно печати Photoshop — когда нужно выставить всё вручную.</p>
+      <div class="pg">стр. 4</div>
+    </div>
+    <div class="card panel-card" style="grid-column: span 2; min-height: 0;">
+      <div style="display:flex; gap:6mm; align-items:center;">
+        <div class="keys"><div class="pill">Панель Iris Tools</div></div>
+        <div>
+          <h3 style="margin-bottom:1mm">Зрачок и шаблоны</h3>
+          <p>Ползунок + синяя кнопка — сузить и закрасить зрачок точно под формат. Серые кнопки — открыть шаблон: Полароид, Мини, Круг, Квадрат, Магнит.</p>
+        </div>
+      </div>
+      <div class="pg">стр. 5</div>
+    </div>
+  </div>
+
+  <div class="callout good mt-auto mb0">
+    <h3>Это делается само — ничего нажимать не нужно</h3>
+    <p>Снимки с камеры сами выравниваются по зрачку. При открытии файла сами ставятся направляющие по центру. Папки для готовых фото создаются сами.</p>
+  </div>
+  <div class="folio"><span>Iris Tools</span><span>1</span></div>
+</section>
+
+<!-- ======================= 2. F5 ======================= -->
+<section class="page">
+  <div class="runhead"><span><b>Iris Tools</b> · инструкция для сотрудников</span><span>Сохранение</span></div>
+
+  <div class="section-head">
+    <div class="keys"><span class="key big">F5</span></div>
+    <div>
+      <h2>Сохранить готовое фото</h2>
+      <div class="sub">Сохраняет открытый документ в JPEG в папку сегодняшнего дня</div>
+    </div>
+  </div>
+
+  <div class="cols" style="margin-bottom:6mm">
+    <div>
+      <ol class="steps">
+        <li>Нажмите <span class="key">F5</span>.</li>
+        <li>Появится окно <b>«Запрос сценария»</b>. Впишите <b>только 4 цифры</b> номера фото — например <code>1233</code>. «4-» писать не нужно, оно подставится само.</li>
+        <li>Нажмите <span class="key">Enter</span> или <b>OK</b>. Готово — файл <code>4-1233.jpg</code> сохранён.</li>
+      </ol>
+      <p class="small muted" style="margin-top:2mm">Открытый документ остаётся как был — сохраняется копия. Можно дальше печатать.</p>
+    </div>
+    <div style="flex:1.05">
+      <div class="win">
+        <div class="bar"><span>Запрос сценария</span><span class="x">✕</span></div>
+        <div class="body">
+          <div class="text">Номер фото (4-____), ровно 4 цифры:</div>
+          <div class="btns"><div class="btn def">OK</div><div class="btn">Отмена</div></div>
+        </div>
+        <div class="input">1233<span class="caret"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout important">
+    <div class="big-line">Папку с готовыми на день создавать НЕ нужно</div>
+    <p>Она появляется сама при первом сохранении за день. Папка месяца — тоже. Просто жмите <span class="key">F5</span> — фото само попадёт куда надо.</p>
+  </div>
+
+  <h3 style="margin-top:2mm">Куда попадает фото</h3>
+  <div class="tree" style="margin-bottom:4mm">
+    <div class="row">
+      <svg class="ico" viewBox="0 0 32 24"><path d="M1 4a2 2 0 0 1 2-2h8l3 3h15a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2z" fill="#f6c453" stroke="#c99212"/></svg>
+      <span class="name">Готовые</span><span class="muted small">— главная папка</span>
+      <span class="tag once">выбрана один раз при установке</span>
+    </div>
+    <div class="row l1">
+      <svg class="ico" viewBox="0 0 32 24"><path d="M1 4a2 2 0 0 1 2-2h8l3 3h15a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2z" fill="#f6c453" stroke="#c99212"/></svg>
+      <span class="name">октябрь 2026</span><span class="muted small">— месяц</span>
+      <span class="tag auto">создаётся сама</span>
+    </div>
+    <div class="row l2">
+      <svg class="ico" viewBox="0 0 32 24"><path d="M1 4a2 2 0 0 1 2-2h8l3 3h15a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2z" fill="#f6c453" stroke="#c99212"/></svg>
+      <span class="name">01.10</span><span class="muted small">— день</span>
+      <span class="tag auto">создаётся сама</span>
+    </div>
+    <div class="row l3">
+      <svg class="ico" viewBox="0 0 32 24"><rect x="5" y="1" width="20" height="22" rx="2" fill="#fff" stroke="#8a90a0"/><path d="M8 17l5-6 4 4 3-3 3 5z" fill="#1473e6"/></svg>
+      <span class="name">4-1233.jpg</span><span class="muted small">— ваше фото</span>
+      <span class="tag you">вы вписали 1233</span>
+    </div>
+  </div>
+
+  <div class="msgs">
+    <h3>Если появилось сообщение</h3>
+    <div class="msg"><div class="q">«Нужно ввести ровно 4 цифры»</div><div class="a">Вписали не 4 цифры (или с буквами/пробелом). Окно откроется снова — впишите 4 цифры.</div></div>
+    <div class="msg"><div class="q">«Файл „4-1233.jpg“ уже существует. Перезаписать?»</div><div class="a"><b>Да</b> — старое фото с этим номером заменится новым. <b>Нет</b> — ничего не сохранится; нажмите <span class="key">F5</span> ещё раз и проверьте номер.</div></div>
+    <div class="msg"><div class="q">Нажали «Отмена»</div><div class="a">Ничего не сохранилось. Просто нажмите <span class="key">F5</span> ещё раз.</div></div>
+    <div class="msg"><div class="q">«Папка из настроек больше не существует»</div><div class="a">Папку «Готовые» переименовали или переместили. Позовите администратора.</div></div>
+  </div>
+  <div class="folio"><span>Iris Tools</span><span>2</span></div>
+</section>
+
+<!-- ======================= 3. F1 / F2 ======================= -->
+<section class="page">
+  <div class="runhead"><span><b>Iris Tools</b> · инструкция для сотрудников</span><span>Пара глаз</span></div>
+
+  <div class="section-head">
+    <div class="keys"><span class="key big">F1</span><span class="plus">/</span><span class="key big">F2</span></div>
+    <div>
+      <h2>Пара глаз на одном листе</h2>
+      <div class="sub">Скрипт сам подгоняет размер и ставит оба глаза по диагонали</div>
+    </div>
+  </div>
+
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <radialGradient id="iris" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#d9a441"/>
+        <stop offset="30%" stop-color="#6c8f4e"/>
+        <stop offset="70%" stop-color="#3f6f8f"/>
+        <stop offset="100%" stop-color="#1d3346"/>
+      </radialGradient>
+      <g id="eye">
+        <circle r="1" fill="url(#iris)"/>
+        <circle r="0.985" fill="none" stroke="#0f1d29" stroke-width="0.03"/>
+        <circle r="0.235" fill="#050505"/>
+        <circle cx="-0.33" cy="-0.36" r="0.07" fill="#fff" opacity=".85"/>
+      </g>
+      <clipPath id="sheet"><rect x="0" y="0" width="300" height="200"/></clipPath>
+    </defs>
+  </svg>
+
+  <div class="layouts">
+    <div class="layout">
+      <div class="lh"><span class="key mid">F1</span><h3>«Углы»</h3></div>
+      <svg viewBox="-6 -6 312 212">
+        <g clip-path="url(#sheet)">
+          <rect width="300" height="200" fill="#fff"/>
+          <use href="#eye" transform="translate(68.2 145.4) scale(93.1)"/>
+          <use href="#eye" transform="translate(230.3 56.1) scale(93.1)"/>
+        </g>
+        <rect width="300" height="200" fill="none" stroke="#16181d" stroke-width="2"/>
+      </svg>
+      <p>Глаза крупные и уходят за края листа: левый — в левый нижний угол, правый — в правый верхний.</p>
+    </div>
+    <div class="layout">
+      <div class="lh"><span class="key mid">F2</span><h3>«Целые»</h3></div>
+      <svg viewBox="-6 -6 312 212">
+        <g clip-path="url(#sheet)">
+          <rect width="300" height="200" fill="#fff"/>
+          <use href="#eye" transform="translate(88.3 116.8) scale(62.5)"/>
+          <use href="#eye" transform="translate(209 84.2) scale(62.5)"/>
+        </g>
+        <rect width="300" height="200" fill="none" stroke="#16181d" stroke-width="2"/>
+      </svg>
+      <p>Оба глаза целиком в кадре, по диагонали: левый чуть ниже, правый чуть выше.</p>
+    </div>
+  </div>
+
+  <h3>Как сделать</h3>
+  <ol class="steps">
+    <li>Перетащите оба готовых глаза в шаблон. <b>Левый глаз — примерно левее, правый — правее.</b> Точно ставить не нужно.</li>
+    <li>В панели <b>«Слои»</b> выделите <b>оба</b> слоя с глазами: щёлкните по первому, затем <span class="key">Ctrl</span> + щелчок по второму.</li>
+    <li>Нажмите <span class="key">F1</span> для «Углов» или <span class="key">F2</span> для «Целых».</li>
+  </ol>
+
+  <div class="callout info">
+    <h3>Формат скрипт определяет сам</h3>
+    <p>A6, A5, A4 или A3 — по размеру открытого шаблона. Размер глаз и их место подбираются под этот формат автоматически.</p>
+  </div>
+
+  <div class="msgs">
+    <h3>Если появилось сообщение</h3>
+    <div class="msg"><div class="q">«Выделите ровно ДВА слоя с глазами… Сейчас выделено слоёв: 1»</div><div class="a">Выделен один слой (или три). Выделите именно два слоя с глазами — щелчок и <span class="key">Ctrl</span> + щелчок — и нажмите клавишу снова.</div></div>
+    <div class="msg"><div class="q">«Формат … px не найден в таблице. Использую значения: по умолчанию (как А5)»</div><div class="a">Открыт не стандартный шаблон A6–A3. Глаза расставятся как для A5 — проверьте результат или откройте правильный шаблон.</div></div>
+  </div>
+  <div class="folio"><span>Iris Tools</span><span>3</span></div>
+</section>
+
+<!-- ======================= 4. ПЕЧАТЬ ======================= -->
+<section class="page">
+  <div class="runhead"><span><b>Iris Tools</b> · инструкция для сотрудников</span><span>Печать</span></div>
+
+  <div class="section-head">
+    <div class="keys"><span class="key big">Ctrl</span><span class="plus">+</span><span class="key big">P</span></div>
+    <div>
+      <h2>Печать по формату</h2>
+      <div class="sub">Одна кнопка — без окон, сразу на принтер</div>
+    </div>
+  </div>
+
+  <p>Скрипт смотрит на открытый документ, понимает, что это за формат, сам выставляет нужную бумагу и настройки принтера и <b>сразу печатает</b>. Ничего выбирать не нужно.</p>
+
+  <table class="t" style="margin-top:2mm">
+    <thead><tr><th style="width:42%">Что открыто</th><th>Как напечатается</th></tr></thead>
+    <tbody>
+      <tr><td><div class="fmt-row"><span class="sheet" style="width:9mm;height:6mm"></span><b>A6</b> — фото 10×15</div></td><td>Бумага 10×15 «без полосы»</td></tr>
+      <tr><td><div class="fmt-row"><span class="sheet" style="width:9mm;height:6mm;background:var(--accent-soft)"></span><span><b>Шаблон 10×15</b> <span class="small muted">— Полароид, Мини, Круг, Квадрат, Магнит</span></span></div></td><td>Бумага под шаблоны 10×15</td></tr>
+      <tr><td><div class="fmt-row"><span class="sheet" style="width:9mm;height:6.4mm"></span><b>A5</b></div></td><td>A5</td></tr>
+      <tr><td><div class="fmt-row"><span class="sheet" style="width:9mm;height:6.4mm"></span><b>A4</b></div></td><td>A4</td></tr>
+      <tr><td><div class="fmt-row"><span class="sheet" style="width:9mm;height:6.4mm"></span><b>A3</b></div></td><td>A3</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout info">
+    <h3>Как скрипт отличает A6 от шаблона 10×15</h3>
+    <p>Размер у них одинаковый, поэтому скрипт смотрит на название файла и папку. Шаблоны, открытые кнопками панели Iris Tools, распознаются сами. Если открываете шаблон по-другому — в названии файла должно быть слово <b>«магнит», «стикер», «полароид»</b> или <b>«телефон»</b>.</p>
+  </div>
+
+  <div class="section-head" style="margin-top:3mm">
+    <div class="keys"><span class="key mid">Ctrl</span><span class="plus">+</span><span class="key mid">Shift</span><span class="plus">+</span><span class="key mid">P</span></div>
+    <div>
+      <h3 style="font-size:15pt;margin:0">Обычная печать</h3>
+      <div class="sub">Стандартное окно печати Photoshop</div>
+    </div>
+  </div>
+  <p>Когда нужно что-то нестандартное: другой размер, несколько копий, другая бумага. Всё выставляете сами, как раньше.</p>
+
+  <div class="msgs">
+    <h3>Если появилось сообщение</h3>
+    <div class="msg"><div class="q">«Формат не распознан. Размер документа: …»</div><div class="a">Документ не A6–A3 и не 10×15. Печатайте через <span class="key">Ctrl</span>+<span class="key">Shift</span>+<span class="key">P</span>.</div></div>
+    <div class="msg"><div class="q">«Формат „…“ на этом компе ещё не настроен… Всё равно печатать?»</div><div class="a">Нажмите <b>Нет</b> и сообщите администратору — иначе бумага может выбраться не та.</div></div>
+    <div class="msg"><div class="q">«Ошибка при печати»</div><div class="a">Проверьте, что принтер включён и в нём есть бумага. Не помогло — к администратору.</div></div>
+    <div class="msg"><div class="q">Напечаталось не на той бумаге</div><div class="a">Сообщите администратору, какой формат и что получилось.</div></div>
+  </div>
+  <div class="folio"><span>Iris Tools</span><span>4</span></div>
+</section>
+
+<!-- ======================= 5. ПАНЕЛЬ ======================= -->
+<section class="page">
+  <div class="runhead"><span><b>Iris Tools</b> · инструкция для сотрудников</span><span>Панель</span></div>
+
+  <div class="section-head">
+    <svg width="15mm" height="15mm" viewBox="0 0 60 60" style="flex:none"><rect width="60" height="60" rx="12" fill="#2b2b2b"/><circle cx="30" cy="30" r="17" fill="none" stroke="#d08a3c" stroke-width="7"/><circle cx="30" cy="30" r="9" fill="#050505"/></svg>
+    <div>
+      <h2>Панель Iris Tools</h2>
+      <div class="sub">Сужает и закрашивает зрачок под формат, открывает шаблоны</div>
+    </div>
+  </div>
+
+  <div class="cols" style="align-items:flex-start; margin-bottom:5mm">
+    <div style="flex:none; position:relative; padding: 2mm 0 0 4mm">
+      <div class="ps-panel">
+        <div class="lbl">Формат документа</div>
+        <div class="fmt">А6 (10x15): радужка 1699 px, зрачок 400 px</div>
+        <div class="slider"><div class="track"></div><div class="fill"></div><div class="knob"></div></div>
+        <div class="blue">Сузить и закрасить зрачок</div>
+        <div class="grid">
+          <div>Полароид</div><div>Мини</div>
+          <div>Круг</div><div>Квадрат</div>
+          <div class="wide">Магнит</div>
+        </div>
+      </div>
+      <div class="badge" style="left:0; top:3mm">1</div>
+      <div class="badge" style="left:0; top:17mm">2</div>
+      <div class="badge" style="left:0; top:27mm">3</div>
+      <div class="badge" style="left:0; top:42mm">4</div>
+    </div>
+    <div>
+      <ul class="legend">
+        <li><span class="n">1</span><div><b>Формат документа.</b> Что панель увидела в открытом шаблоне и какого размера будут радужка и зрачок. Меняется сама при переключении вкладок.</div></li>
+        <li><span class="n">2</span><div><b>Ползунок.</b> Размер круга зрачка. При движении появляется пунктирный круг по центру.</div></li>
+        <li><span class="n">3</span><div><b>Синяя кнопка.</b> Сужает зрачок и закрашивает его чёрным точно под формат.</div></li>
+        <li><span class="n">4</span><div><b>Шаблоны.</b> Открывают нужный шаблон. Если он уже открыт — просто переключают на него.</div></li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Как сузить и закрасить зрачок</h3>
+  <ol class="steps">
+    <li>В панели <b>«Слои»</b> выделите слой с радужкой.</li>
+    <li>Сдвиньте ползунок. Радужка <b>сама встанет по центру и в нужный размер</b>, и появится пунктирный круг. Двигайте ползунок, пока круг не совпадёт с <b>краем зрачка на фото</b>.</li>
+    <li>Нажмите синюю кнопку <b>«Сузить и закрасить зрачок»</b>. Зрачок сузится и закрасится чёрным ровно под размер формата.</li>
+  </ol>
+
+  <div class="cols">
+    <div class="callout">
+      <h3>Не понравился результат</h3>
+      <p>Откройте панель <b>«История»</b> (Окно → История), щёлкните по шагу до кнопки и сделайте ещё раз с другим положением ползунка.</p>
+    </div>
+    <div class="callout">
+      <h3>Панель пропала</h3>
+      <p>Меню <b>Плагины → Iris Tools</b>. Панель снова появится — её можно перетащить рядом со «Слоями».</p>
+    </div>
+  </div>
+
+  <div class="msgs">
+    <h3>Если появилась красная надпись</h3>
+    <div class="msg"><div class="q">«Выделите слой с радужкой»</div><div class="a">Не выделен ни один слой. Щёлкните по слою с радужкой в панели «Слои».</div></div>
+    <div class="msg"><div class="q">«Формат не опознан (…) — считаю по пропорции»</div><div class="a">Открыт не шаблон A6–A3. Панель работает, но размеры примерные — проверьте, тот ли файл открыт.</div></div>
+    <div class="msg"><div class="q">«Нет файла: …» или «Папка не читается»</div><div class="a">Шаблон переименовали или переместили. Позовите администратора.</div></div>
+  </div>
+  <div class="folio"><span>Iris Tools</span><span>5</span></div>
+</section>
+
+</body>
+</html>

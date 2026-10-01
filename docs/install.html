@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Iris Tools — инструкция по установке</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .hero .kicker {
+    font-family: "Manrope", sans-serif; font-weight: 700; font-size: 10pt;
+    color: var(--accent); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 3mm;
+  }
+  .hero h1 { margin-bottom: 4mm; }
+
+  .need { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5mm 6mm; margin-bottom: 5mm; }
+  .need div { display: flex; gap: 2.5mm; font-size: 9.8pt; }
+  .need div::before {
+    content: ""; flex: none; width: 4mm; height: 4mm; margin-top: .8mm;
+    border: 1.4px solid var(--ink); border-radius: 1mm;
+  }
+
+  .road { display: flex; flex-direction: column; gap: 0; }
+  .road .st { display: flex; gap: 4mm; align-items: flex-start; position: relative; padding-bottom: 3.2mm; }
+  .road .st:not(:last-child)::after {
+    content: ""; position: absolute; left: 3.6mm; top: 7.6mm; bottom: 0; width: 1.4px; background: var(--line);
+  }
+  .road .num {
+    flex: none; width: 7.4mm; height: 7.4mm; border-radius: 50%; background: var(--ink); color: #fff;
+    font-family: "Manrope", sans-serif; font-weight: 800; font-size: 10pt;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .road .num.pc { background: #fff; color: var(--ink); border: 1.4px solid var(--ink); }
+  .road .tx { padding-top: .8mm; }
+  .road .tx b { font-weight: 600; }
+  .road .tx .where { font-size: 8.5pt; color: var(--muted); margin-left: 1.5mm; }
+
+  .filetree { font-family: "JetBrains Mono", monospace; font-size: 8.6pt; line-height: 1.65; margin: 0; white-space: pre; color: var(--ink-2); }
+  .filetree b { color: var(--ink); font-weight: 700; }
+  .filetree i { font-style: normal; color: var(--muted); font-family: "Inter", sans-serif; font-size: 8.4pt; }
+
+  .stephead { display: flex; align-items: center; gap: 4mm; margin-bottom: 4mm; }
+  .stephead .where {
+    margin-left: auto; font-size: 8pt; font-weight: 600; padding: 1mm 3mm; border-radius: 10mm;
+    border: 1px solid var(--line); color: var(--ink-2); white-space: nowrap;
+  }
+  .block { margin-bottom: 5mm; }
+
+  .menu { font-weight: 600; }
+  .menu .en { font-weight: 400; color: var(--muted); font-size: 8.6pt; }
+
+  .check { list-style: none; padding: 0; margin: 0 0 4mm; }
+  .check li { display: flex; gap: 3mm; padding: 2mm 0; border-bottom: 1px solid var(--line); font-size: 9.6pt; }
+  .check li::before {
+    content: ""; flex: none; width: 4.2mm; height: 4.2mm; margin-top: .5mm;
+    border: 1.4px solid var(--ink); border-radius: 1mm;
+  }
+  .check li:last-child { border-bottom: none; }
+</style>
+</head>
+<body>
+
+<!-- ======================= 1. ОБЗОР ======================= -->
+<section class="page">
+  <div class="runhead"><span><b>Iris Tools</b> · инструкция по установке</span><span>Обзор</span></div>
+
+  <div class="hero" style="margin-bottom:6mm">
+    <div class="kicker">Установка на новый компьютер</div>
+    <h1>Как поставить<br>Iris Tools</h1>
+    <p class="lead">Около 20 минут. Шаги 1–2 — установщик сам раскладывает всё по местам. Шаги 3–7 — несколько настроек в самом Photoshop.</p>
+  </div>
+
+  <h3>Что нужно заранее</h3>
+  <div class="need">
+    <div><span>Photoshop 2025 установлен и хотя бы раз запускался</span></div>
+    <div><span>Принтер EPSON L18050 подключён, драйвер установлен</span></div>
+    <div><span>Есть интернет (для Python и библиотек)</span></div>
+    <div><span>Учётная запись с правами администратора</span></div>
+    <div><span>Папка <b>Шаблоны</b> с PSD уже лежит на компьютере</span></div>
+    <div><span>Понятно, где папка <b>исходники</b> (куда приходят снимки) и куда класть готовые</span></div>
+  </div>
+
+  <div class="cols">
+    <div style="flex:1.15">
+      <h3>Шаги</h3>
+      <div class="road">
+        <div class="st"><div class="num">1</div><div class="tx"><b>Распаковать архив</b><span class="where">стр. 2</span></div></div>
+        <div class="st"><div class="num">2</div><div class="tx"><b>Запустить УСТАНОВИТЬ.bat</b><span class="where">стр. 2</span></div></div>
+        <div class="st"><div class="num pc">3</div><div class="tx"><b>Горячие клавиши</b><span class="where">стр. 3</span></div></div>
+        <div class="st"><div class="num pc">4</div><div class="tx"><b>Направляющие при открытии</b><span class="where">стр. 4</span></div></div>
+        <div class="st"><div class="num pc">5</div><div class="tx"><b>Панель Iris Tools</b><span class="where">стр. 4</span></div></div>
+        <div class="st"><div class="num pc">6</div><div class="tx"><b>Папка для готовых (F5)</b><span class="where">стр. 4</span></div></div>
+        <div class="st"><div class="num pc">7</div><div class="tx"><b>Настройка печати</b><span class="where">стр. 5</span></div></div>
+        <div class="st"><div class="num" style="background:var(--ok)">✓</div><div class="tx"><b>Проверка</b><span class="where">стр. 6</span></div></div>
+      </div>
+      <p class="small muted" style="margin-top:2mm">Чёрный кружок — делает установщик, белый — вручную в Photoshop.</p>
+    </div>
+    <div>
+      <h3>Что в архиве</h3>
+<pre class="filetree"><b>УСТАНОВИТЬ.bat</b>          <i>← запускать это</i>
+Инструкция по установке.pdf
+Инструкция для сотрудников.pdf
+<b>files/</b>                  <i>← не трогать</i>
+  install.ps1
+  Scripts/        <i>F1, F2, F5, направляющие</i>
+  Print/          <i>Ctrl+P и профиль принтера</i>
+  IrisToolsPanel/ <i>панель</i>
+  Watcher/        <i>центровка по зрачку</i></pre>
+    </div>
+  </div>
+
+  <div class="callout info mt-auto mb0">
+    <h3>Сотрудникам распечатайте или скиньте «Инструкцию для сотрудников»</h3>
+    <p>Там только то, что нажимают руками: F5, F1/F2, печать, панель.</p>
+  </div>
+  <div class="folio"><span>Iris Tools · установка</span><span>1</span></div>
+</section>
+
+<!-- ======================= 2. УСТАНОВЩИК ======================= -->
+<section class="page">
+  <div class="runhead"><span><b>Iris Tools</b> · инструкция по установке</span><span>Шаги 1–2</span></div>
+
+  <div class="block">
+    <div class="stephead"><div class="step-no">1</div><h2>Распакуйте архив</h2><span class="where">Проводник</span></div>
+    <p>Правой кнопкой по архиву → <b>«Извлечь всё…»</b> → в любую обычную папку, например на Рабочий стол. <b>Не запускайте файлы прямо из архива</b> — установщик не найдёт остальные файлы.</p>
+  </div>
+
+  <div class="block">
+    <div class="stephead"><div class="step-no">2</div><h2>Запустите УСТАНОВИТЬ.bat</h2><span class="where">Двойной щелчок</span></div>
+    <ol class="steps">
+      <li><b>Закройте Photoshop.</b> Если он открыт, установщик попросит его закрыть.</li>
+      <li>Дважды щёлкните <code>УСТАНОВИТЬ.bat</code>.<br>
+        <span class="muted">Если синее окно «Система Windows защитила ваш компьютер» — нажмите <b>«Подробнее»</b> → <b>«Выполнить в любом случае»</b>. На вопрос «Разрешить этому приложению вносить изменения?» — <b>«Да»</b>.</span></li>
+      <li>Откроется окно выбора папки <b>№1 — папка с шаблонами</b>: та, где лежат <code>Полароид новый.psd</code>, <code>Большой магнит.psd</code> и т. д. Выберите её → <b>OK</b>.</li>
+      <li>Окно <b>№2 — папка «исходники»</b>: куда приходят снимки с камеры. Выберите её → <b>OK</b>.<br>
+        <span class="muted">Если на этом компе центровка по зрачку не нужна — нажмите «Отмена».</span></li>
+      <li>Подождите 2–5 минут: установщик скачает Python и библиотеки, если их нет. В конце будет надпись <b style="color:var(--ok)">«Всё установлено без ошибок»</b> → нажмите <span class="key">Enter</span>.</li>
+    </ol>
+  </div>
+
+  <h3>Что установщик сделал</h3>
+  <table class="t">
+    <thead><tr><th style="width:38%">Что</th><th>Куда</th></tr></thead>
+    <tbody>
+      <tr><td>Скрипты F1, F2, F5, печать</td><td><code>C:\Program Files\Adobe\Adobe Photoshop 2025\Presets\Scripts</code></td></tr>
+      <tr><td>Направляющие по центру</td><td><code>…\Presets\Scripts\Event Scripts Only</code></td></tr>
+      <tr><td>Панель Iris Tools <span class="muted small">+ путь к шаблонам</span></td><td><code>…\Adobe Photoshop 2025\Plug-ins\IrisToolsPanel</code></td></tr>
+      <tr><td>Профиль принтера</td><td><code>C:\Windows\System32\spool\drivers\color</code></td></tr>
+      <tr><td>Центровка по зрачку <span class="muted small">+ путь к «исходникам»</span></td><td><code>C:\Photoshop</code> и ярлык «Центровка зрачка» в автозагрузке — запускается сам при входе в Windows</td></tr>
+      <tr><td>Python 3.13 <span class="muted small">если не было</span></td><td><code>C:\Python\Python313</code></td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout important mt-auto mb0">
+    <h3>Если в конце красным «Были ошибки»</h3>
+    <p>Чаще всего — нет интернета. Исправьте и запустите <code>УСТАНОВИТЬ.bat</code> ещё раз: повторный запуск ничего не ломает. Подробный отчёт — в файле <code>лог установки.txt</code> рядом.</p>
+  </div>
+  <div class="folio"><span>Iris Tools · установка</span><span>2</span></div>
+</section>
+
+<!-- ======================= 3. ГОРЯЧИЕ КЛАВИШИ ======================= -->
+<section class="page">
+  <div class="runhead"><span><b>Iris Tools</b> · инструкция по установке</span><span>Шаг 3</span></div>
+
+  <div class="stephead"><div class="step-no">3</div><h2>Горячие клавиши</h2><span class="where">Photoshop</span></div>
+
+  <ol class="steps">
+    <li>Запустите Photoshop. Меню <span class="menu">Редактирование → Клавиатурные сокращения… <span class="en">(Edit → Keyboard Shortcuts)</span></span> или <span class="key">Alt</span>+<span class="key">Shift</span>+<span class="key">Ctrl</span>+<span class="key">K</span>.</li>
+    <li>Вверху в списке <b>«Сочетания клавиш для»</b> должно стоять <b>«Меню программы»</b> <span class="muted">(Application Menus)</span>.</li>
+    <li>Раскройте <b>«Файл»</b>. Найдите в нём пункты из таблицы ниже (скрипты — в конце, после «Сценарии»). Щёлкните в колонку «Сочетание клавиш» напротив пункта и нажмите нужную клавишу.</li>
+    <li>Если Photoshop пишет, что клавиша <b>уже используется</b> — это нормально (F1 — справка, Ctrl+P — печать). Нажмите <b>«Принять»</b>: у старой команды клавиша снимется.</li>
+    <li>Когда всё назначено — <b>OK</b>.</li>
+  </ol>
+
+  <table class="t" style="margin-top:2mm">
+    <thead><tr><th style="width:52%">Пункт в меню «Файл»</th><th style="width:22%">Клавиша</th><th>Что это</th></tr></thead>
+    <tbody>
+      <tr><td>Сценарии → <b>Углы</b></td><td><span class="key">F1</span></td><td>Пара глаз «Углы»</td></tr>
+      <tr><td>Сценарии → <b>Целые</b></td><td><span class="key">F2</span></td><td>Пара глаз «Целые»</td></tr>
+      <tr><td>Сценарии → <b>save_jpeg</b></td><td><span class="key">F5</span></td><td>Сохранение</td></tr>
+      <tr><td>Сценарии → <b>Print_ByFormat</b></td><td><span class="key">Ctrl</span>+<span class="key">P</span></td><td>Печать по формату</td></tr>
+      <tr><td><b>Печатать…</b> <span class="muted small">(Print…)</span></td><td><span class="key">Ctrl</span>+<span class="key">Shift</span>+<span class="key">P</span></td><td>Обычная печать</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout info">
+    <h3>Порядок для Ctrl+P</h3>
+    <p>Сначала назначьте <span class="key">Ctrl</span>+<span class="key">P</span> на <b>Print_ByFormat</b> (Photoshop снимет его с «Печатать…»), потом — <span class="key">Ctrl</span>+<span class="key">Shift</span>+<span class="key">P</span> на <b>«Печатать…»</b>.</p>
+  </div>
+
+  <div class="callout">
+    <h3>Нет пунктов Углы, Целые, save_jpeg, Print_ByFormat</h3>
+    <p>Photoshop был открыт во время установки — перезапустите его. Если всё равно нет — запустите <code>УСТАНОВИТЬ.bat</code> ещё раз и посмотрите, нет ли ошибок.</p>
+  </div>
+
+  <div class="callout good mt-auto mb0">
+    <h3>Совет: сохраните набор клавиш</h3>
+    <p>В том же окне нажмите значок <b>«Сохранить набор»</b> (дискета) — тогда клавиши не потеряются после обновления Photoshop.</p>
+  </div>
+  <div class="folio"><span>Iris Tools · установка</span><span>3</span></div>
+</section>
+
+<!-- ======================= 4. СОБЫТИЯ, ПАНЕЛЬ, F5 ======================= -->
+<section class="page">
+  <div class="runhead"><span><b>Iris Tools</b> · инструкция по установке</span><span>Шаги 4–6</span></div>
+
+  <div class="block">
+    <div class="stephead"><div class="step-no">4</div><h2>Направляющие при открытии</h2><span class="where">Photoshop</span></div>
+    <p class="muted" style="margin-top:-1mm">Чтобы при открытии и создании файла сами ставились две направляющие по центру.</p>
+    <ol class="steps">
+      <li><span class="menu">Файл → Сценарии → Диспетчер событий сценариев… <span class="en">(File → Scripts → Script Events Manager)</span></span></li>
+      <li>Поставьте галочку <b>«Разрешить событиям запускать сценарии/операции»</b>.</li>
+      <li><b>Событие Photoshop:</b> «Открыть документ» <span class="muted">(Open Document)</span>. <b>Сценарий:</b> <code>auto-center-guides</code> → <b>«Добавить»</b>.</li>
+      <li><b>Событие:</b> «Новый документ» <span class="muted">(New Document)</span>, сценарий тот же → <b>«Добавить»</b> → <b>«Готово»</b>.</li>
+    </ol>
+    <p class="small muted mb0">Если <code>auto-center-guides</code> нет в списке сценариев — выберите «Обзор…» и укажите файл <code>C:\Program Files\Adobe\Adobe Photoshop 2025\Presets\Scripts\Event Scripts Only\auto-center-guides.jsx</code>.</p>
+  </div>
+
+  <div class="block">
+    <div class="stephead"><div class="step-no">5</div><h2>Панель Iris Tools</h2><span class="where">Photoshop</span></div>
+    <ol class="steps">
+      <li>Меню <span class="menu">Плагины → Iris Tools <span class="en">(Plugins)</span></span>. Появится панель.</li>
+      <li>Перетащите её за вкладку к панели «Слои», чтобы она всегда была под рукой.</li>
+      <li>Проверьте: нажмите серую кнопку <b>«Магнит»</b> — должен открыться шаблон.</li>
+    </ol>
+    <p class="small muted mb0">Нет пункта Iris Tools в меню «Плагины» — перезапустите Photoshop. Пишет «Нет файла» или «Папка не читается» — при установке выбрана не та папка шаблонов: запустите <code>УСТАНОВИТЬ.bat</code> ещё раз и выберите правильную.</p>
+  </div>
+
+  <div class="block mb0">
+    <div class="stephead"><div class="step-no">6</div><h2>Папка для готовых фото</h2><span class="where">Photoshop · один раз</span></div>
+    <ol class="steps">
+      <li>Откройте любое фото и нажмите <span class="key">F5</span>.</li>
+      <li>Первый раз появится окно <b>«Выберите КОРНЕВУЮ папку для готовых фото»</b>. Выберите (или создайте кнопкой «Создать папку») главную папку, например <code>Рабочий стол\Готовые</code> → <b>OK</b>.</li>
+      <li>Впишите пробный номер <code>0000</code>. Проверьте, что появился файл <code>Готовые\&lt;месяц год&gt;\&lt;ДД.ММ&gt;\4-0000.jpg</code>, и удалите его.</li>
+    </ol>
+    <p class="small muted mb0">Скрипт запомнит папку навсегда. Сменить потом: зажать <span class="key">Shift</span> и выбрать мышкой <span class="menu">Файл → Сценарии → save_jpeg</span>.</p>
+  </div>
+  <div class="folio"><span>Iris Tools · установка</span><span>4</span></div>
+</section>
+
+<!-- ======================= 5. ПЕЧАТЬ ======================= -->
+<section class="page">
+  <div class="runhead"><span><b>Iris Tools</b> · инструкция по установке</span><span>Шаг 7</span></div>
+
+  <div class="stephead"><div class="step-no">7</div><h2>Настройка печати</h2><span class="where">Photoshop · по разу на формат</span></div>
+
+  <p>Бумага в драйвере Epson на каждой точке называется по-своему, поэтому печати один раз показывают, какую бумагу брать для каждого формата. Скрипт запомнит это на этом компьютере, и дальше <span class="key">Ctrl</span>+<span class="key">P</span> будет печатать сам.</p>
+
+  <p class="small muted">Принтер в Windows должен называться <b>EPSON L18050 Series</b> (Параметры → Принтеры и сканеры).</p>
+
+  <h3 style="margin-top:3mm">Для каждого из 5 форматов</h3>
+  <ol class="steps">
+    <li>Откройте шаблон этого формата.</li>
+    <li><span class="menu">Файл → Сценарии → Print_ByFormat_Setup</span>. В сообщении проверьте, что формат назван правильно → <b>OK</b>.</li>
+    <li>Откроется окно печати Photoshop. Проверьте: принтер <b>EPSON L18050 Series</b>, профиль <b>L8050_EyePH_Chern</b>.</li>
+    <li>Нажмите <b>«Параметры печати…»</b> → в окне Epson выберите <b>бумагу из таблицы</b> (как она называется на этой точке), без полей, тип бумаги и качество — как обычно → <b>OK</b>.</li>
+    <li>Нажмите <b>«Готово»</b>. Появится список форматов: <code>[+]</code> — настроен, <code>[&nbsp;&nbsp;]</code> — ещё нет.</li>
+  </ol>
+
+  <table class="t" style="margin-top:2mm">
+    <thead><tr><th style="width:40%">Какой шаблон открыть</th><th>Бумага в окне Epson</th></tr></thead>
+    <tbody>
+      <tr><td><b>A6</b> — обычное фото 10×15</td><td>10×15 <b>«без полосы»</b> <span class="muted small">(на точке может называться иначе)</span></td></tr>
+      <tr><td><b>Шаблон 10×15</b> — например «Магнит»</td><td>10×15 для шаблонов (магниты, стикеры, полароид)</td></tr>
+      <tr><td><b>A5</b></td><td>A5</td></tr>
+      <tr><td><b>A4</b></td><td>A4</td></tr>
+      <tr><td><b>A3</b></td><td>A3</td></tr>
+    </tbody>
+  </table>
+
+  <div class="cols">
+    <div class="callout">
+      <h3>«Настройка не сохранена»</h3>
+      <p>Значит, окно закрыли не через «Готово». Повторите; если снова не сохраняет — нажмите <b>«Печать»</b> вместо «Готово» (выйдет один пробный лист).</p>
+    </div>
+    <div class="callout">
+      <h3>Перенастроить формат</h3>
+      <p>Просто пройдите шаги для него ещё раз — новые настройки заменят старые.</p>
+    </div>
+  </div>
+
+  <div class="callout good mt-auto mb0">
+    <h3>Проверка</h3>
+    <p>Откройте шаблон каждого формата и нажмите <span class="key">Ctrl</span>+<span class="key">P</span> — должно сразу напечататься на нужной бумаге, без окон и вопросов.</p>
+  </div>
+  <div class="folio"><span>Iris Tools · установка</span><span>5</span></div>
+</section>
+
+<!-- ======================= 6. ПРОВЕРКА И ПРОБЛЕМЫ ======================= -->
+<section class="page">
+  <div class="runhead"><span><b>Iris Tools</b> · инструкция по установке</span><span>Проверка</span></div>
+
+  <div class="stephead"><div class="step-no" style="background:var(--ok)">✓</div><h2>Проверка — всё работает?</h2></div>
+  <ul class="check">
+    <li><span>Открыли фото — по центру сами появились две направляющие.</span></li>
+    <li><span>Положили снимок в «исходники» — через 5–10 секунд он обрезан по зрачку (JPEG — копия в подпапке <code>centered</code>, RAW открывается в Camera Raw уже обрезанным).</span></li>
+    <li><span><span class="key">F5</span> сохраняет в <code>Готовые\месяц\день</code>.</span></li>
+    <li><span><span class="key">F1</span> / <span class="key">F2</span> раскладывают пару глаз (выделены два слоя).</span></li>
+    <li><span><span class="key">Ctrl</span>+<span class="key">P</span> печатает сразу, <span class="key">Ctrl</span>+<span class="key">Shift</span>+<span class="key">P</span> открывает обычную печать.</span></li>
+    <li><span>Панель показывает формат, кнопки шаблонов открывают файлы.</span></li>
+  </ul>
+
+  <h3 style="margin-top:2mm">Если что-то не так</h3>
+  <table class="t">
+    <thead><tr><th style="width:36%">Проблема</th><th>Что сделать</th></tr></thead>
+    <tbody>
+      <tr><td>Снимки не центруются</td><td>Запустите <code>C:\Photoshop\Сторож.bat</code> — откроется окно с подробностями. «Папка не найдена» — запустите установщик и выберите правильную папку «исходники». «No module named…» — запустите установщик ещё раз при включённом интернете. Окно потом можно закрыть.</td></tr>
+      <tr><td>Центрует только новые снимки</td><td>Так и задумано: сторож берёт файлы за последние 2 суток и помнит уже обработанные.</td></tr>
+      <tr><td>Направляющие не появляются</td><td>Повторите шаг 4 — проверьте галочку и оба события.</td></tr>
+      <tr><td><span class="key">Ctrl</span>+<span class="key">P</span>: «не настроен на этом компе»</td><td>Шаг 7 для этого формата.</td></tr>
+      <tr><td>Печатает не на той бумаге</td><td>Шаг 7 для этого формата ещё раз, внимательно выбрать бумагу.</td></tr>
+      <tr><td>F5 снова спрашивает папку</td><td>Папку «Готовые» переместили или переименовали — выберите её заново.</td></tr>
+      <tr><td>Клавиши не работают</td><td>Повторите шаг 3. После обновления Photoshop клавиши могут сброситься.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout mt-auto mb0">
+    <h3>Обновить или переставить</h3>
+    <p>Новую версию файлов или другую папку шаблонов / «исходников» — просто запустите <code>УСТАНОВИТЬ.bat</code> ещё раз. Настройки печати и папка для F5 сохраняются.</p>
+  </div>
+  <div class="folio"><span>Iris Tools · установка</span><span>6</span></div>
+</section>
+
+<!-- ======================= 7. ВРУЧНУЮ ======================= -->
+<section class="page">
+  <div class="runhead"><span><b>Iris Tools</b> · инструкция по установке</span><span>Приложение</span></div>
+
+  <h2 style="margin-bottom:2mm">Ручная установка</h2>
+  <p class="muted">Только если установщик не сработал. Файлы — в папке <code>files</code> архива.</p>
+
+  <h3 style="margin-top:3mm">1. Скопировать</h3>
+  <table class="t">
+    <thead><tr><th style="width:40%">Файлы</th><th>Куда</th></tr></thead>
+    <tbody>
+      <tr><td><code>Scripts\save_jpeg.jsx</code>, <code>Углы.jsx</code>, <code>Целые.jsx</code>,<br><code>Print\Print_ByFormat.jsx</code>, <code>Print_ByFormat_Setup.jsx</code></td><td><code>C:\Program Files\Adobe\Adobe Photoshop 2025\Presets\Scripts</code></td></tr>
+      <tr><td><code>Scripts\auto-center-guides.jsx</code></td><td><code>…\Presets\Scripts\Event Scripts Only</code></td></tr>
+      <tr><td>Папку <code>IrisToolsPanel</code> целиком</td><td><code>…\Adobe Photoshop 2025\Plug-ins</code></td></tr>
+      <tr><td><code>Print\L8050_EyePH_Chern.icm</code></td><td><code>C:\Windows\System32\spool\drivers\color</code></td></tr>
+      <tr><td>Всё из <code>Watcher</code></td><td><code>C:\Photoshop</code> (создать папку)</td></tr>
+    </tbody>
+  </table>
+
+  <h3>2. Поменять пути</h3>
+  <p class="small">Открыть в Блокноте (для файлов в Program Files — Блокнот «от имени администратора»), заменить путь на свой, сохранить.</p>
+  <p class="small mb0"><b>Папка шаблонов</b> — <code>Plug-ins\IrisToolsPanel\main.js</code>, слэши <b>прямые /</b>:</p>
+<pre class="code">const TEMPLATES_DIR = "<span class="hl">C:/Users/EyePhoto/Desktop/Шаблоны</span>";</pre>
+  <p class="small mb0"><b>Папка «исходники»</b> — <code>C:\Photoshop\center_watcher.py</code>:</p>
+<pre class="code">WATCH_FOLDER = r"<span class="hl">C:\Users\EyePhoto\Desktop\исходники</span>"</pre>
+  <p class="small mb0"><b>Путь к Python</b> (если он не в <code>C:\Python\Python313</code>) — <code>C:\Photoshop\Сторож.bat</code>:</p>
+<pre class="code">set "PYTHON=<span class="hl">C:\Python\Python313\python.exe</span>"</pre>
+
+  <h3>3. Python и автозапуск центровки</h3>
+  <ol class="steps">
+    <li>Скачать Python 3.13 с python.org. При установке отметить <b>«Add python.exe to PATH»</b>.</li>
+    <li>В командной строке: <code>python -m pip install opencv-python numpy rawpy pillow</code></li>
+    <li><span class="key">Win</span>+<span class="key">R</span> → <code>shell:startup</code> → Enter. Правый клик → Создать → Ярлык. Объект (именно <b>pythonw</b>):<br><code>C:\Python\Python313\pythonw.exe "C:\Photoshop\center_watcher.py"</code> → имя «Центровка зрачка».</li>
+  </ol>
+
+  <p class="small muted mt-auto mb0">Дальше — шаги 3–7 этой инструкции как обычно.</p>
+  <div class="folio"><span>Iris Tools · установка</span><span>7</span></div>
+</section>
+
+</body>
+</html>
